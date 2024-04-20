@@ -66,7 +66,9 @@ module ChessBoardModel =
             let newModel = {
                 model with
                     GameState = gameStateResult
+                    SquareModels = buildSquareModels gameStateResult
                     ErrorMsg = None
+                    SelectedSquare = None
             }
             newModel, Cmd.none
         | ChessBoardMsg.GotGameState(Error err) ->
@@ -86,14 +88,20 @@ module ChessBoardModel =
                 )
 
             let cmd =
-                validRangeOpt
-                |> Option.map (fun lst ->
-                    lst
-                    |> ChessSquareMsg.ValidTargetMsg
-                    |> ChessBoardMsg.ChessSquareMsg
-                    |> Cmd.ofMsg
-                )
-                |> Option.defaultValue Cmd.none
+
+                match model.SelectedSquare with
+                | Some (fromRow, fromCol) ->
+                    let move = $"%s{ChessBoard.colNames[fromCol]}%i{fromRow+1}:%s{ChessBoard.colNames[col]}%i{row+1}"
+                    Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
+                | _ ->
+                    validRangeOpt
+                    |> Option.map (fun lst ->
+                        lst
+                        |> ChessSquareMsg.ValidTargetMsg
+                        |> ChessBoardMsg.ChessSquareMsg
+                        |> Cmd.ofMsg
+                    )
+                    |> Option.defaultValue Cmd.none
 
             let newSquares = updateSquares model sqMsg
             let newSelected = Some (row, col)
