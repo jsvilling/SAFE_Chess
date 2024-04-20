@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="paket.references" />
+    <Compile Include="Engine\ChessPiece.fs" />
+    <Compile Include="Engine\MovementRange.fs" />
+    <Compile Include="Engine\ChessBoard.fs" />
+    <Compile Include="Engine\GameState.fs" />
+    <Compile Include="Engine\Serialize.fs" />
+    <Compile Include="Engine\Shared.fs" />
+    <Compile Include="Api\IChessApi.fs" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
+</Project>
