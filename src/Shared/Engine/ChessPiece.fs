@@ -23,14 +23,14 @@ type ChessPiece =
 
 [<RequireQualifiedAccess>]
 module ChessPiece =
-    let hasColor (piece: ChessPiece) (reqColor: Color) =
+    let hasOtherColor (piece: ChessPiece) (reqColor: Color) =
         match piece with
         | ChessPiece.Pawn color
         | ChessPiece.Rook color
         | ChessPiece.Knight color
         | ChessPiece.Bishop color
         | ChessPiece.Queen color
-        | ChessPiece.King color -> color = reqColor
+        | ChessPiece.King color -> color <> reqColor
 
     let color (piece: ChessPiece) =
         match piece with

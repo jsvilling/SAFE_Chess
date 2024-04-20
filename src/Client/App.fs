@@ -1,9 +1,13 @@
 module App
 
+open Chess.Api
+open Chess.Ui
 open Elmish
 open Elmish.React
 
 open Fable.Core.JsInterop
+open Fable.Remoting.Client
+open Shared
 
 importSideEffects "./index.css"
 
@@ -12,7 +16,7 @@ open Elmish.Debug
 open Elmish.HMR
 #endif
 
-Program.mkProgram Index.init Index.update Index.view
+Program.mkProgram ChessBoardModel.init ChessBoardModel.update ChessBoardView.view
 #if DEBUG
 |> Program.withConsoleTrace
 #endif
