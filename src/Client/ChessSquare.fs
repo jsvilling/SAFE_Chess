@@ -7,6 +7,7 @@ open Feliz
 type ChessSquareMsg =
     | SquareClickedMsg of row: int * col: int
     | ValidTargetMsg of (int * int) list
+    | ResetMsg
 
 type ChessSquareModel = {
     Row: int
@@ -37,6 +38,9 @@ module ChessSquareModel =
             newModel
         | ChessSquareMsg.SquareClickedMsg _ ->
             let newModel = { model with Selected = false }
+            newModel
+        | ChessSquareMsg.ResetMsg ->
+            let newModel = { model with Selected = false; ValidTarget = false; }
             newModel
 
 [<RequireQualifiedAccess>]

@@ -33,7 +33,7 @@ module ChessBoardModel =
         let mkSquares (i: int, row: ChessPiece option array) =
             row |> Array.indexed |> Array.map (fun (j, pc) -> ChessSquareModel.init i j pc)
 
-        let squares = gameState.Board  |> Array.indexed |> Array.map mkSquares
+        let squares = gameState.Board |> Array.indexed |> Array.map mkSquares
         squares
 
 
@@ -49,6 +49,7 @@ module ChessBoardModel =
                 SelectedSquare = None
                 ValidMoves = None
             }
+
             initModel
 
         let cmd = Cmd.OfAsync.perform chessApi.start () ChessBoardMsg.GotGameState
@@ -58,6 +59,7 @@ module ChessBoardModel =
         let newSquares =
             model.SquareModels
             |> Array.map (fun row -> row |> Array.map (ChessSquareModel.update squareMsg))
+
         newSquares
 
     let update (msg: ChessBoardMsg) (model: ChessBoardModel) =
@@ -70,6 +72,7 @@ module ChessBoardModel =
                     ErrorMsg = None
                     SelectedSquare = None
             }
+
             newModel, Cmd.none
         | ChessBoardMsg.GotGameState(Error err) ->
             let newModel = { model with ErrorMsg = Some err }
@@ -78,36 +81,50 @@ module ChessBoardModel =
             let newModel = { model with ErrorMsg = None }
             let cmd = Cmd.OfAsync.perform chessApi.move s ChessBoardMsg.GotGameState
             newModel, cmd
-        | ChessBoardMsg.ChessSquareMsg (ChessSquareMsg.SquareClickedMsg (row, col) as sqMsg) ->
+        | ChessBoardMsg.ChessSquareMsg(ChessSquareMsg.SquareClickedMsg(row, col) as sqMsg) ->
             let pc = model.SquareModels[row][col]
 
             let validRangeOpt =
                 pc.Piece
-                |> Option.map (fun pc ->
-                    MovementRange.movementRange (row, col) pc model.GameState.Board
-                )
+                |> Option.map (fun pc -> MovementRange.movementRange (row, col) pc model.GameState.Board)
 
-            let cmd =
+            let isValidMove (fromRow, fromCol) =
+                (model.SquareModels[fromRow][fromCol]).Piece
+                |> Option.exists (fun pc ->
+                    MovementRange.movementRange (fromRow, fromCol) pc model.GameState.Board
+                    |> List.contains (row, col))
 
-                match model.SelectedSquare with
-                | Some (fromRow, fromCol) ->
-                    let move = $"%s{ChessBoard.colNames[fromCol]}%i{fromRow+1}:%s{ChessBoard.colNames[col]}%i{row+1}"
-                    Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
-                | _ ->
+            match model.SelectedSquare with
+            | Some(fromRow, fromCol) when isValidMove (fromRow, fromCol) ->
+                let move =
+                    $"%s{ChessBoard.colNames[fromCol]}%i{fromRow + 1}:%s{ChessBoard.colNames[col]}%i{row + 1}"
+
+                let cmd = Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
+                model, cmd
+            | Some _ ->
+                let cmd = ChessSquareMsg.ResetMsg |> ChessBoardMsg.ChessSquareMsg |> Cmd.ofMsg
+                let newModel = { model with SelectedSquare = None }
+                newModel, cmd
+            | _ ->
+                let cmd =
                     validRangeOpt
                     |> Option.map (fun lst ->
                         lst
                         |> ChessSquareMsg.ValidTargetMsg
                         |> ChessBoardMsg.ChessSquareMsg
-                        |> Cmd.ofMsg
-                    )
+                        |> Cmd.ofMsg)
                     |> Option.defaultValue Cmd.none
 
-            let newSquares = updateSquares model sqMsg
-            let newSelected = Some (row, col)
+                let newSquares = updateSquares model sqMsg
+                let newSelected = Some(row, col)
 
-            let newModel = { model with SquareModels = newSquares; SelectedSquare = newSelected }
-            newModel, cmd
+                let newModel = {
+                    model with
+                        SquareModels = newSquares
+                        SelectedSquare = newSelected
+                }
+
+                newModel, cmd
         | ChessBoardMsg.ChessSquareMsg sqMsg ->
             let newSquares = updateSquares model sqMsg
             let newModel = { model with SquareModels = newSquares }
@@ -126,15 +143,14 @@ module ChessBoardView =
                         style.display.grid
                         style.gridTemplateColumns [ 150; 150; 150; 150; 150; 150; 150; 150 ]
                     ]
-                    prop.children (row |> Array.map (fun sq -> ChessSquareView.view sq (ChessBoardMsg.ChessSquareMsg >> dispatch)))
+                    prop.children (
+                        row
+                        |> Array.map (fun sq -> ChessSquareView.view sq (ChessBoardMsg.ChessSquareMsg >> dispatch))
+                    )
                 ]
 
             Html.div [
                 prop.className "chessboard"
-                prop.children (
-                    model.SquareModels
-                    |> Array.map mkRow
-                    |> Array.rev
-                )
+                prop.children (model.SquareModels |> Array.map mkRow |> Array.rev)
             ]
         ]
