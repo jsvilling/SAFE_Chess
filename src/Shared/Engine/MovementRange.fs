@@ -18,9 +18,6 @@ module MovementRange =
         =
         let nR = transX r
         let nC = transY c
-        let hasPiece () =
-            let pcOpt = board[nR][nC]
-            pcOpt.IsSome
 
         if max nR nC >= upper || min nR nC < lower then
             moves
@@ -109,12 +106,12 @@ module MovementRange =
             rangeToBorder board id left color
         ]  |> List.collect (fun mv -> mv row col [])
 
-    let keep (row: int, col: int) (color: Color) (board: ChessPiece option array array) =
-        board[row][col]
-        |> Option.map (fun p -> ChessPiece.hasOtherColor p color)
-        |> Option.defaultValue true
-
     let movementRange (row: int, col: int) (piece: ChessPiece) (board: ChessPiece option array array) =
+        let keep (row: int, col: int) (color: Color) (board: ChessPiece option array array) =
+            board[row][col]
+            |> Option.map (fun p -> ChessPiece.hasOtherColor p color)
+            |> Option.defaultValue true
+
         let color = ChessPiece.color piece
         let horizontals () = horizontalsToBorder board color (row, col)
         let diagonals () = diagonalsToBorder board color (row, col)
@@ -122,10 +119,8 @@ module MovementRange =
         match piece with
         | ChessPiece.Pawn Color.White when row = 1-> [ (row + 1, col); (row + 2, col)  ]
         | ChessPiece.Pawn Color.White when row < 7 -> [ (row + 1, col) ]
-
         | ChessPiece.Pawn Color.Black when row = 6 -> [ (row - 1, col); (row - 2, col)  ]
         | ChessPiece.Pawn Color.Black when row > 0 -> [ (row - 1, col) ]
-
         | ChessPiece.Rook _ -> horizontalsToBorder board color (row, col)
         | ChessPiece.Knight _ -> knight (row, col)
         | ChessPiece.Bishop _ -> diagonals ()
@@ -135,25 +130,23 @@ module MovementRange =
         |> List.filter (fun rc -> keep rc (ChessPiece.color piece) board)
 
     let hasChess (board: ChessPiece option array array) (defenderColor: Color) =
-        let attackerColor = Color.other defenderColor
-        let kingPosition =
-            Array.indexed board
-            |> Array.choose (fun (i, r) ->
-                Array.tryFindIndex (fun p -> p = Some (ChessPiece.King defenderColor)) r
-                |> Option.map (fun j -> (i, j))
+        let chessFromField i j pcOpt =
+            pcOpt
+            |> Option.filter (fun pc -> ChessPiece.hasOtherColor pc defenderColor )
+            |> Option.map (fun pc ->
+                movementRange (i, j) pc board
+                |> Seq.choose (fun (r, c) -> board[r][c])
             )
-            |> Array.head
 
-        let all = [
-            ChessPiece.Pawn attackerColor
-            ChessPiece.Rook defenderColor
-            ChessPiece.Knight defenderColor
-            ChessPiece.Bishop attackerColor
-            ChessPiece.Queen defenderColor
-        ]
+        let chessInRow (i: int) (row: ChessPiece option seq) =
+            row
+            |> Seq.indexed
+            |> Seq.choose (fun (j, pcOpt) -> chessFromField i j pcOpt)
+            |> Seq.collect id
+            |> Seq.exists (fun pcOpt -> pcOpt = (ChessPiece.King defenderColor))
 
-        all
-        |> List.exists (fun p ->
-            let mvs = movementRange kingPosition p board
-            mvs |> List.exists (fun (r, c) -> board[r][c] = Some p)
-        )
+        let ic =
+            board
+            |> Array.indexed
+            |> Array.exists (fun (i, row) -> chessInRow i row)
+        ic

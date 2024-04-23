@@ -36,7 +36,6 @@ module ChessBoardModel =
         let squares = gameState.Board |> Array.indexed |> Array.map mkSquares
         squares
 
-
     let init () =
         let model =
             let gameState = GameState.init
@@ -55,12 +54,16 @@ module ChessBoardModel =
         let cmd = Cmd.OfAsync.perform chessApi.start () ChessBoardMsg.GotGameState
         model, cmd
 
-    let private updateSquares model (squareMsg) =
+    let private updateSquares (model: ChessBoardModel) (squareMsg: ChessSquareMsg) =
         let newSquares =
             model.SquareModels
             |> Array.map (fun row -> row |> Array.map (ChessSquareModel.update squareMsg))
-
         newSquares
+
+    let resetHighlights model =
+        let cmd = ChessSquareMsg.ResetMsg |> ChessBoardMsg.ChessSquareMsg |> Cmd.ofMsg
+        let newModel = { model with SelectedSquare = None }
+        newModel, cmd
 
     let update (msg: ChessBoardMsg) (model: ChessBoardModel) =
         match msg with
@@ -82,10 +85,10 @@ module ChessBoardModel =
             let cmd = Cmd.OfAsync.perform chessApi.move s ChessBoardMsg.GotGameState
             newModel, cmd
         | ChessBoardMsg.ChessSquareMsg(ChessSquareMsg.SquareClickedMsg(row, col) as sqMsg) ->
-            let pc = model.SquareModels[row][col]
+            let selectedPiece = (model.SquareModels[row][col]).Piece
 
             let validRangeOpt =
-                pc.Piece
+                selectedPiece
                 |> Option.map (fun pc -> MovementRange.movementRange (row, col) pc model.GameState.Board)
 
             let isValidMove (fromRow, fromCol) =
@@ -101,10 +104,10 @@ module ChessBoardModel =
 
                 let cmd = Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
                 model, cmd
-            | Some _ ->
-                let cmd = ChessSquareMsg.ResetMsg |> ChessBoardMsg.ChessSquareMsg |> Cmd.ofMsg
-                let newModel = { model with SelectedSquare = None }
-                newModel, cmd
+            | None when selectedPiece |> Option.exists(fun pc -> ChessPiece.hasOtherColor pc model.GameState.Active) ->
+                resetHighlights model
+            | Some _  ->
+                resetHighlights model
             | _ ->
                 let cmd =
                     validRangeOpt
@@ -134,14 +137,16 @@ module ChessBoardModel =
 module ChessBoardView =
     let view (model: ChessBoardModel) (dispatch: ChessBoardMsg -> unit) =
         Html.section [
-            let errorMsg = model.ErrorMsg |> Option.defaultValue "Ok"
-            Html.p $"%A{errorMsg}"
+            Html.p $"Active: %A{model.GameState.Active}"
+            Html.p $"Chess: %b{model.GameState.IsChess}"
+            let errorMsg = model.ErrorMsg |> Option.defaultValue "-"
+            Html.p $"Error: %A{errorMsg}"
 
             let mkRow (row: ChessSquareModel array) =
                 Html.div [
                     prop.style [
                         style.display.grid
-                        style.gridTemplateColumns [ 150; 150; 150; 150; 150; 150; 150; 150 ]
+                        style.gridTemplateColumns [ 150; 150; 150; 150; 150; 150; 150; 150; 150 ]
                     ]
                     prop.children (
                         row

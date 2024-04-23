@@ -20,7 +20,6 @@ module GameState =
     }
 
     let update (prevState: GameState) (move: string) =
-
         match ChessBoard.tryApplyMove prevState.Board move with
         | Error err ->
             let nextState = { prevState with ErrorMsg = Some err }
