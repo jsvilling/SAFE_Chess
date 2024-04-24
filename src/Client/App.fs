@@ -6,8 +6,8 @@ open Elmish
 open Elmish.React
 
 open Fable.Core.JsInterop
-open Fable.Remoting.Client
-open Shared
+
+open Elmish.Bridge
 
 importSideEffects "./index.css"
 
@@ -17,11 +17,10 @@ open Elmish.HMR
 #endif
 
 Program.mkProgram ChessBoardModel.init ChessBoardModel.update ChessBoardView.view
+|> Program.withBridge BridgeConfig.endpoint
 #if DEBUG
 |> Program.withConsoleTrace
-#endif
 |> Program.withReactSynchronous "elmish-app"
-#if DEBUG
 |> Program.withDebugger
 #endif
 |> Program.run

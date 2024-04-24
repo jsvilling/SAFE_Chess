@@ -8,10 +8,16 @@
   <ItemGroup>
     <None Include="paket.references" />
     <Compile Include="GameRegistry.fs" />
+    <Compile Include="WebSocketApi.fs" />
+    <Compile Include="RemotingApi.fs" />
     <Compile Include="Server.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Elmish.Bridge.Giraffe" Version="7.0.0" />
+    <PackageReference Include="Elmish.Bridge.Server" Version="7.0.0" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

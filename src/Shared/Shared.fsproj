@@ -12,6 +12,7 @@
     <Compile Include="Engine\Serialize.fs" />
     <Compile Include="Engine\Shared.fs" />
     <Compile Include="Api\IChessApi.fs" />
+    <Compile Include="Api\BridgeConfig.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
