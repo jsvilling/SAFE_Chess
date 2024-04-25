@@ -14,7 +14,6 @@ module RemotingApi =
 
     let private chessApi: IChessApi = {
         start = fun () -> async { return Ok GameState.init }
-        move = fun moveStr -> async { return moveStr |> GameRegistry.move |> Ok }
     }
 
     let endpoint: HttpHandler =
