@@ -1,13 +1,8 @@
 namespace Chess.Ui
 
 open Chess
+open Chess.Api
 open Feliz
-
-[<RequireQualifiedAccess>]
-type ChessSquareMsg =
-    | SquareClickedMsg of row: int * col: int
-    | ValidTargetMsg of (int * int) list
-    | ResetMsg
 
 type ChessSquareModel = {
     Row: int

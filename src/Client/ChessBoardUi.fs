@@ -7,12 +7,6 @@ open Fable.Remoting.Client
 open Feliz
 open Shared
 
-[<RequireQualifiedAccess>]
-type ChessBoardMsg =
-    | MakeMoveRequest of string
-    | GotGameState of Result<GameState, string>
-    | ChessSquareMsg of ChessSquareMsg
-
 type ChessBoardModel = {
     GameState: GameState
     SquareModels: ChessSquareModel array array
@@ -82,7 +76,7 @@ module ChessBoardModel =
             newModel, Cmd.none
         | ChessBoardMsg.MakeMoveRequest s ->
             let newModel = { model with ErrorMsg = None }
-            let cmd = Cmd.OfAsync.perform chessApi.move s ChessBoardMsg.GotGameState
+            let cmd = Elmish.Bridge.Cmd.bridgeSend (ServerMsg.MakeMove s)//Cmd.OfAsync.perform chessApi.move s ChessBoardMsg.GotGameState
             newModel, cmd
         | ChessBoardMsg.ChessSquareMsg(ChessSquareMsg.SquareClickedMsg(row, col) as sqMsg) ->
             let selectedPiece = (model.SquareModels[row][col]).Piece
@@ -102,7 +96,8 @@ module ChessBoardModel =
                 let move =
                     $"%s{ChessBoard.colNames[fromCol]}%i{fromRow + 1}:%s{ChessBoard.colNames[col]}%i{row + 1}"
 
-                let cmd = Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
+                //let cmd = Cmd.OfAsync.perform chessApi.move move ChessBoardMsg.GotGameState
+                let cmd = Elmish.Bridge.Cmd.bridgeSend (ServerMsg.MakeMove move)
                 model, cmd
             | None when selectedPiece |> Option.exists(fun pc -> ChessPiece.hasOtherColor pc model.GameState.Active) ->
                 resetHighlights model
