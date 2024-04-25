@@ -12,7 +12,7 @@ type GameState =
 
 [<RequireQualifiedAccess>]
 module GameState =
-    let init = {
+    let init () = {
         GameId = System.Guid.NewGuid()
         Active = Color.White
         Board = ChessBoard.init

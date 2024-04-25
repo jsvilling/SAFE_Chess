@@ -13,7 +13,7 @@ open Chess.Api
 module RemotingApi =
 
     let private chessApi: IChessApi = {
-        start = fun () -> async { return Ok GameState.init }
+        start = fun () -> async { return Ok (GameState.init ()) }
     }
 
     let endpoint: HttpHandler =

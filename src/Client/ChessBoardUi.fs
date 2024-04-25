@@ -32,7 +32,7 @@ module ChessBoardModel =
 
     let init () =
         let model =
-            let gameState = GameState.init
+            let gameState = GameState.init ()
             let squares = buildSquareModels gameState
 
             let initModel = {

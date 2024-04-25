@@ -14,7 +14,7 @@ type ServerModel = {
 [<RequireQualifiedAccess>]
 module ServerModel =
     let init = {
-        GameState = GameState.init
+        GameState = GameState.init ()
     }
 
 [<RequireQualifiedAccess>]
@@ -27,7 +27,7 @@ module WebSocketApi =
 
         let newGameState =
             match msg with
-            | ServerMsg.ResetGame -> GameState.init
+            | ServerMsg.ResetGame -> GameState.init ()
             | ServerMsg.MakeMove move -> GameState.update model.GameState move
 
         clientDispatch (ChessBoardMsg.GotGameState (Ok newGameState))
