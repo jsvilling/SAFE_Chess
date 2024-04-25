@@ -132,6 +132,7 @@ module ChessBoardModel =
 module ChessBoardView =
     let view (model: ChessBoardModel) (dispatch: ChessBoardMsg -> unit) =
         Html.section [
+            Html.p $"Game Id: %A{model.GameState.GameId}"
             Html.p $"Active: %A{model.GameState.Active}"
             Html.p $"Chess: %b{model.GameState.IsChess}"
             let errorMsg = model.ErrorMsg |> Option.defaultValue "-"

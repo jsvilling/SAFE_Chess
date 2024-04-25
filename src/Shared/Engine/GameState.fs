@@ -2,6 +2,7 @@ namespace Chess
 
 type GameState =
     {
+      GameId: System.Guid
       Active: Color
       Board: ChessPiece option array array
       Moves: string array
@@ -12,6 +13,7 @@ type GameState =
 [<RequireQualifiedAccess>]
 module GameState =
     let init = {
+        GameId = System.Guid.NewGuid()
         Active = Color.White
         Board = ChessBoard.init
         Moves = [||]
