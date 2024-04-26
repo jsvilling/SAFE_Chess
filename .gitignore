@@ -19,10 +19,7 @@ release.sh
 *.fsproj.user
 *.DotSettings.user
 /src/Server/Server.fs
-/.direnv/flake-inputs/6bf943g0mlhymyffs9dflzgc78r93s60-source/
-/.direnv/flake-inputs/xv03bji11jxhfhr7f9xyqqqykzkvn14p-source/
-/.direnv/flake-profile-a5d5b61aa8a61b7d9d765e1daf971a9a578f1cfa
-/.direnv/flake-profile-a5d5b61aa8a61b7d9d765e1daf971a9a578f1cfa.rc
+/.direnv/
 /src/Client/fable_modules/Fable.Elmish.4.1.0/cmd.fs
 /src/Client/fable_modules/Fable.Elmish.4.1.0/cmd.obsolete.fs
 /src/Client/fable_modules/Fable.Elmish.4.1.0/Fable.Elmish.fableproj
@@ -209,3 +206,4 @@ release.sh
 /src/Client/fable_modules/Thoth.Json.10.2.0/Thoth.Json.fableproj
 /src/Client/fable_modules/Thoth.Json.10.2.0/Types.fs
 /src/Client/fable_modules/project_cracked_debug.json
+/.direnv/
